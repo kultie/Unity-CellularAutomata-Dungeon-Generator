@@ -6,17 +6,18 @@ using Kultie.ProcedualDungeon;
 public class Controller : MonoBehaviour {
     Dungeon dungeon;
     public GameObject cellsContainer;
-    public RectTransform mapCellPrefab;
+    public Image mapCellPrefab;
     public float cellSize;
-
+    public int dungeonWidth = 200;
+    public int dungeonHeight = 200;
 
     bool[,] map;
-    private int dungeonWidth = 75;
-    private int dungeonHeight = 75;
 
-    Dictionary<string, RectTransform> cacheObj = new Dictionary<string, RectTransform>();
-	// Use this for initialization
-	void CreateMap () {
+
+    Dictionary<string, Image> cacheImg = new Dictionary<string, Image>();
+    Dictionary<Image, RectTransform> cacheTransform = new Dictionary<Image, RectTransform>();
+    // Use this for initialization
+    void CreateMap () {
         dungeon = new Dungeon(dungeonWidth, dungeonHeight);
         map = dungeon.GetDungeonGrid();
         for (int i = 0; i < 6; i++)
@@ -24,7 +25,9 @@ public class Controller : MonoBehaviour {
             map = dungeon.SimulationStep(map);
         }
         DrawMap();
-	}
+        FloodFill(map, dungeonWidth/2, dungeonHeight/2, Color.blue);
+
+    }
 
 	private void Update()
 	{
@@ -36,28 +39,28 @@ public class Controller : MonoBehaviour {
         }
 	}
 
-
-
 	void DrawMap(){
         for (int i = 0; i < map.GetLength(0); i++)
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
                 string key = i.ToString() + "-" + j.ToString();
-                RectTransform cell = null;
-                if(!cacheObj.TryGetValue(key, out cell)){
+                Image cell = null;
+                if(!cacheImg.TryGetValue(key, out cell)){
                     cell = Instantiate(mapCellPrefab, cellsContainer.transform);
-                    cacheObj[key] = cell;
+                    cacheImg[key] = cell;
                 }
+                cacheTransform[cell] = cell.GetComponent<RectTransform>();
                 DrawMapCell(cell, new Vector2(i, j), map[i, j]);
             }
         }
     }
 	
-    void DrawMapCell(RectTransform mapCell, Vector2 position, bool value){
-        mapCell.localScale = Vector3.one;
-        mapCell.sizeDelta = Vector2.one * cellSize;
-        mapCell.transform.localPosition = position * cellSize - new Vector2(dungeonWidth * cellSize / 2,dungeonHeight * cellSize / 2);
+    void DrawMapCell(Image mapCell, Vector2 position, bool value){
+        RectTransform transform = cacheTransform[mapCell];
+        transform.localScale = Vector3.one;
+        transform.sizeDelta = Vector2.one * cellSize;
+        transform.localPosition = position * cellSize - new Vector2(dungeonWidth * cellSize / 2,dungeonHeight * cellSize / 2);
         mapCell.GetComponent<Image>().color = value ? Color.white : Color.black;
     }
 
@@ -71,11 +74,37 @@ public class Controller : MonoBehaviour {
                     if(nbs >= 6){
                         if(Random.Range(0f,1f) >= 0.75f){
                             string key = i.ToString() + "-" + j.ToString();
-                            cacheObj[key].GetComponent<Image>().color = Color.yellow;
+                            cacheImg[key].color = Color.yellow;
                         }
                     }
                 }
             }
         }
+    }
+
+    void FloodFillUtil(bool[,] _map, int x, int y, Color prevC, Color newC)
+    {      
+        if (x < 0 || x >= _map.GetLength(0) || y < 0 || y >= _map.GetLength(1))
+            return;
+
+        string key = x.ToString() + "-" + y.ToString();
+        var currentNode = cacheImg[key];
+
+        if (currentNode.color != prevC)
+            return;
+
+        currentNode.color = newC;
+
+        FloodFillUtil(_map, x + 1, y, prevC, newC);
+        FloodFillUtil(_map, x - 1, y, prevC, newC);
+        FloodFillUtil(_map, x, y + 1, prevC, newC);
+        FloodFillUtil(_map, x, y - 1, prevC, newC);
+    }
+
+    void FloodFill(bool[,] _map, int x, int y, Color newC)
+    {
+        string key = x.ToString() + "-" + y.ToString();
+        var prevC = cacheImg[key].color;
+        FloodFillUtil(_map, x, y, prevC, newC);
     }
 }
