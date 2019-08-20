@@ -12,11 +12,15 @@ namespace Kultie.ProcedualDungeon
 
         private int starvationLimit = 5;
 
-        private int birthLimit = 3;
+        private int birthLimit = 4;
 
         public Dungeon(int width, int height)
         {
             dungeonGrid = InitialiseMap(width, height);
+        }
+
+        public void CreateMap(){
+            
         }
 
         bool[,] InitialiseMap(int width, int height)
