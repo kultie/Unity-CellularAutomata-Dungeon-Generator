@@ -10,7 +10,7 @@ public class Controller : MonoBehaviour {
     public float cellSize;
     public int dungeonWidth = 200;
     public int dungeonHeight = 200;
-
+    [SerializeField]
     bool[,] map;
 
     int fillSpace;
@@ -23,15 +23,16 @@ public class Controller : MonoBehaviour {
         fillSpace = 0;
         dungeon = new Dungeon(dungeonWidth, dungeonHeight);
         map = dungeon.GetDungeonGrid();
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 6; i++)
         {
             map = dungeon.SimulationStep(map);
         }
+        map = dungeon.GetDungeonGrid();
         DrawMap();
         FloodFill(map, dungeonWidth / 2, dungeonHeight / 2, Color.white);
-        ClearAllLeftOver();
+        //ClearAllLeftOver();
+        AddTerrain();
         float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
-
         if(filledRate < 0.4f){
             CreateMap();
         }
@@ -52,9 +53,9 @@ public class Controller : MonoBehaviour {
 	}
 
 	void DrawMap(){
-        for (int i = 0; i < map.GetLength(0); i++)
+        for (int i = 0; i < dungeonWidth; i++)
         {
-            for (int j = 0; j < map.GetLength(1); j++)
+            for (int j = 0; j < dungeonHeight; j++)
             {
                 string key = i.ToString() + "-" + j.ToString();
                 Image cell = null;
@@ -73,7 +74,7 @@ public class Controller : MonoBehaviour {
         transform.localScale = Vector3.one;
         transform.sizeDelta = Vector2.one * cellSize;
         transform.localPosition = position * cellSize - new Vector2(dungeonWidth * cellSize / 2,dungeonHeight * cellSize / 2);
-        mapCell.GetComponent<Image>().color = value ? Color.blue : Color.black;
+        mapCell.GetComponent<Image>().color = value ? Color.blue : Color.grey;
     }
 
     void PlaceTresure(){
@@ -81,13 +82,15 @@ public class Controller : MonoBehaviour {
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
-                if(!map[i,j]){
-                    int nbs = dungeon.CountAliveNeightbours(map, i, j);
-                    if(nbs >= 5 && nbs < 8){
-                        if(Random.Range(0,1f) < 0.25f){
+                if(i == 0 || j == 0 || i == map.GetLength(0) - 1 || j == map.GetLength(1) - 1){
+                    if (map[i, j])
+                    {
+                        int nbs = dungeon.CountAliveNeightbours(map, i, j);
+                        if (nbs >= 3)
+                        {
                             string key = i.ToString() + "-" + j.ToString();
                             cacheImg[key].color = Color.yellow;
-                        }   
+                        }
                     }
                 }
             }
@@ -111,6 +114,30 @@ public class Controller : MonoBehaviour {
                 }
             }
         }
+    }
+
+    void AddTerrain()
+    {
+        Vector2 offSet = Vector2.one * Random.Range(-100f, 100f);
+        for (int i = 0; i < dungeonWidth; i++)
+        {
+            for (int j = 0; j < dungeonHeight; j++)
+            {
+                string key = i + "-" + j;
+                if (cacheImg[key].color == Color.white || cacheImg[key].color == Color.blue)
+                {
+                    float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, cellSize, offSet);
+                    cacheImg[key].color = new Color(1f, 1 * data, 0.5f, 1f);
+                }
+            }
+        }
+    }
+
+    float GenerateTerrain(int x, int y, int mapWidth, int mapHeight, float scale, Vector2 offSet)
+    {
+        float xCoord = (float)x / mapWidth * scale;
+        float yCoord = (float)y / mapHeight * scale;
+        return Mathf.PerlinNoise(xCoord + offSet.x, yCoord + offSet.y);
     }
 
     void FloodFillUtil(bool[,] _map, int x, int y, Color prevC, Color newC)
@@ -140,13 +167,12 @@ public class Controller : MonoBehaviour {
     }
 
     void ClearAllLeftOver(){
-        for (int i = 0; i < map.GetLength(0); i++)
+        for (int i = 0; i < dungeonWidth; i++)
         {
-            for (int j = 0; j < map.GetLength(1); j++)
+            for (int j = 0; j < dungeonHeight; j++)
             {
                 string key = i + "-" + j;
                 if(map[i,j] && cacheImg[key].color == Color.blue){
-                    map[i, j] = false;
                     cacheImg[key].color = Color.black;
                 }
             }

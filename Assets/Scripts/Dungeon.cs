@@ -69,6 +69,7 @@ namespace Kultie.ProcedualDungeon
                     }
                 }
             }
+            dungeonGrid = newDungeon;
             return newDungeon;
         }
 

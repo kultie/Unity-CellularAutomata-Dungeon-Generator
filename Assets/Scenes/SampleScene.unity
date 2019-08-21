@@ -213,9 +213,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellsContainer: {fileID: 1408953952}
   mapCellPrefab: {fileID: 1704677437}
-  cellSize: 5
+  cellSize: 16
   dungeonWidth: 100
-  dungeonHeight: 50
+  dungeonHeight: 100
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
