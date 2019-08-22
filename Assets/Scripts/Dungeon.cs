@@ -164,12 +164,12 @@ namespace Kultie.ProcedualDungeon
                 {
                     if (dungeonGrid[i, j].cellType == DungeonCellType.PATH)
                     {
+                        CalculateCellSpriteValue(i, j, DungeonCellType.PATH);
                         float data = GenerateTerrain(i, j, mapWidth, mapHeight, 2, offSet);
                         dungeonGrid[i, j].pathValue = data;
                     }
                     if (dungeonGrid[i, j].cellType == DungeonCellType.WALL)
                     {
-                        CalculateCellSpriteValue(i, j, DungeonCellType.WALL);
                         float data = GenerateTerrain(i, j, mapWidth, mapHeight, 2, offSet);
                         dungeonGrid[i, j].wallValue = data;
                     }
@@ -189,6 +189,13 @@ namespace Kultie.ProcedualDungeon
         }
 
         public void CalculateCellSpriteValue(int x, int y, DungeonCellType compareCellType)
+        {
+            //int value = HorizontalAndVerticleSpriteValue(x, y, compareCellType) + DiagonalSpriteValue(x, y, compareCellType);
+            int value = HorizontalAndVerticleSpriteValue4Bit(x, y, compareCellType);
+            dungeonGrid[x, y].spriteValue = value;
+        }
+
+        int HorizontalAndVerticleSpriteValue4Bit(int x, int y, DungeonCellType compareCellType)
         {
             bool upCell;
             bool leftCell;
@@ -232,8 +239,107 @@ namespace Kultie.ProcedualDungeon
             }
 
             int value = 1 * ConvertBoolToInt(upCell) + 2 * ConvertBoolToInt(leftCell) + 4 * ConvertBoolToInt(rightCell) + 8 * ConvertBoolToInt(downCell);
-            dungeonGrid[x, y].spriteValue = value;
+            return value;
         }
+
+        int HorizontalAndVerticleSpriteValue(int x, int y, DungeonCellType compareCellType)
+        {
+            bool upCell;
+            bool leftCell;
+            bool rightCell;
+            bool downCell;
+
+            if (y >= mapHeight - 1)
+            {
+                upCell = false;
+            }
+            else
+            {
+                upCell = dungeonGrid[x, y + 1].cellType == compareCellType;
+            }
+
+            if (x <= 0)
+            {
+                leftCell = false;
+            }
+            else
+            {
+                leftCell = dungeonGrid[x - 1, y].cellType == compareCellType;
+            }
+
+            if (x >= mapWidth - 1)
+            {
+                rightCell = false;
+            }
+            else
+            {
+                rightCell = dungeonGrid[x + 1, y].cellType == compareCellType;
+            }
+
+            if (y <= 0)
+            {
+                downCell = false;
+            }
+            else
+            {
+                downCell = dungeonGrid[x, y - 1].cellType == compareCellType;
+            }
+            int value = 2 * ConvertBoolToInt(upCell) + 8 * ConvertBoolToInt(leftCell) + 16 * ConvertBoolToInt(rightCell) + 64 * ConvertBoolToInt(downCell);
+            return value;
+        }
+
+        int DiagonalSpriteValue(int x, int y, DungeonCellType compareCellType)
+        {
+            bool nwCell = false;
+            bool neCell = false;
+            bool swCell = false;
+            bool seCell = false;
+
+            if (y == mapHeight - 1)
+            {
+                nwCell = false;
+                neCell = false;
+            }
+            else{
+                if (x == 0)
+                {
+                    nwCell = false;
+                }
+                else if (x == mapWidth - 1)
+                {
+                    neCell = false;
+                }
+                else{
+                    nwCell = dungeonGrid[x - 1, y + 1].cellType == compareCellType;
+                    neCell = dungeonGrid[x + 1, y + 1].cellType == compareCellType;
+                }
+            }
+
+            if(y == 0){
+                swCell = false;
+                seCell = false;
+            }
+            else{
+                if (x == 0)
+                {
+                    swCell = false;
+                }
+                else if (x == mapWidth - 1)
+                {
+                    seCell = false;
+                }
+                else
+                {
+                    swCell = dungeonGrid[x - 1, y - 1].cellType == compareCellType;
+                    seCell = dungeonGrid[x + 1, y - 1].cellType == compareCellType;
+                }
+            }           
+
+            int value = 1 * ConvertBoolToInt(nwCell) + 4 * ConvertBoolToInt(neCell) + 32 * ConvertBoolToInt(swCell) + 128 * ConvertBoolToInt(seCell);
+            return value;
+        }
+
+
 
         int ConvertBoolToInt(bool value)
         {
