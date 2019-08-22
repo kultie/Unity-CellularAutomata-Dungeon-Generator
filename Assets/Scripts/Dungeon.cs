@@ -1,13 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 namespace Kultie.ProcedualDungeon
 {
     public enum DungeonCellType { PATH, WALL };
     public class Dungeon
     {
         private DungeonCell[,] dungeonGrid;
-        private float chanceToStartAlive = 0.45f;
+        private int chanceToStartAlive = 45;
 
         private int overpopLimit = 8;
 
@@ -23,7 +22,6 @@ namespace Kultie.ProcedualDungeon
                 dungeonGrid = SimulationStep(dungeonGrid);
             }
         }
-
         public void CreateMap(){
             
         }
@@ -31,11 +29,12 @@ namespace Kultie.ProcedualDungeon
         DungeonCell[,] InitialiseMap(int width, int height)
         {
             DungeonCell[,] dungeon = new DungeonCell[width, height];
+            Random rnd = new Random();
             for (int i = 0; i < dungeon.GetLength(0); i++)
             {
                 for (int j = 0; j < dungeon.GetLength(1); j++)
                 {
-                    float randomValue = Random.Range(0f, 1f);
+                    float randomValue = rnd.Next(0,100);
                     dungeon[i, j] = new DungeonCell(randomValue < chanceToStartAlive ? DungeonCellType.PATH : DungeonCellType.WALL);
 
                 }
@@ -46,17 +45,6 @@ namespace Kultie.ProcedualDungeon
         public DungeonCell[,] GetDungeonGrid()
         {
             return dungeonGrid;
-        }
-
-        void PrintDungeon(DungeonCell[,] dungeons){
-            Debug.Log("--------------------------------------");
-            for (int i = 0; i < dungeons.GetLength(0); i++)
-            {
-                for (int j = 0; j < dungeons.GetLength(1); j++)
-                {
-                    Debug.Log(dungeons[i, j].cellType);
-                }
-            }
         }
 
         public DungeonCell[,] SimulationStep(DungeonCell[,] oldDungeon)

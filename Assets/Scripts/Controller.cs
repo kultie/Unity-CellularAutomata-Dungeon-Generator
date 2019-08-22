@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Kultie.ProcedualDungeon;
+using System.Threading;
+using System;
+
 public class Controller : MonoBehaviour {
     Dungeon dungeon;
     public GameObject cellsContainer;
-    public Image mapCellPrefab;
+    public SpriteRenderer mapCellPrefab;
     public float cellSize;
     public int dungeonWidth = 200;
     public int dungeonHeight = 200;
@@ -14,23 +17,39 @@ public class Controller : MonoBehaviour {
 
     int fillSpace;
 
-    Dictionary<string, Image> cacheImg = new Dictionary<string, Image>();
-    Dictionary<Image, RectTransform> cacheTransform = new Dictionary<Image, RectTransform>();
+    Dictionary<string, SpriteRenderer> cacheImg = new Dictionary<string, SpriteRenderer>();
     // Use this for initialization
     void CreateMap () {
        
         fillSpace = 0;
-        dungeon = new Dungeon(dungeonWidth, dungeonHeight);       
-        map = dungeon.GetDungeonGrid();
-        DrawMap();
-        FloodFill(map, dungeonWidth / 2, dungeonHeight / 2, Color.white);
-        ClearAllLeftOver();
-        DrawMap();
-        AddTerrain();
-        float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
-        if(filledRate < 0.4f){
-            CreateMap();
+        StartCoroutine(GenerateMap(()=>{
+            map = dungeon.GetDungeonGrid();
+            DrawMap();
+            FloodFill(map, dungeonWidth / 2, dungeonHeight / 2, Color.white);
+            ClearAllLeftOver();
+            DrawMap();
+            AddTerrain();
+            float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
+            if (filledRate < 0.4f)
+            {
+                CreateMap();
+            }
+        }));
+    }
+
+    IEnumerator GenerateMap(Action callback){
+        bool done = false;
+        Thread thread = new Thread(() =>
+        {
+            dungeon = new Dungeon(dungeonWidth, dungeonHeight);
+            done = true;
+        });
+        thread.Start();
+        while(!done){
+            yield return null;
         }
+        Debug.Log("Finish generate Map");
+        callback();
     }
 
 	private void Update()
@@ -53,23 +72,21 @@ public class Controller : MonoBehaviour {
             for (int j = 0; j < dungeonHeight; j++)
             {
                 string key = i.ToString() + "-" + j.ToString();
-                Image cell = null;
+                SpriteRenderer cell = null;
                 if(!cacheImg.TryGetValue(key, out cell)){
                     cell = Instantiate(mapCellPrefab, cellsContainer.transform);
                     cacheImg[key] = cell;
                 }
-                cacheTransform[cell] = cell.GetComponent<RectTransform>();
                 DrawMapCell(cell, new Vector2(i, j), map[i, j].cellType == DungeonCellType.PATH);
             }
         }
     }
 	
-    void DrawMapCell(Image mapCell, Vector2 position, bool value){
-        RectTransform transform = cacheTransform[mapCell];
-        transform.localScale = Vector3.one;
-        transform.sizeDelta = Vector2.one * cellSize;
-        transform.localPosition = position * cellSize - new Vector2(dungeonWidth * cellSize / 2,dungeonHeight * cellSize / 2);
-        mapCell.GetComponent<Image>().color = value ? Color.blue : Color.grey;
+    void DrawMapCell(SpriteRenderer mapCell, Vector2 position, bool value){
+        Transform cellTransform = mapCell.transform;
+        cellTransform.localScale = Vector3.one;
+        cellTransform.localPosition = position - new Vector2(dungeonWidth/ 2,dungeonHeight/ 2);
+        mapCell.color = value ? Color.blue : Color.grey;
     }
 
     void PlaceTresure(){
@@ -113,7 +130,7 @@ public class Controller : MonoBehaviour {
 
     void AddTerrain()
     {
-        Vector2 offSet = Vector2.one * Random.Range(-100f, 100f);
+        Vector2 offSet = Vector2.one * UnityEngine.Random.Range(-100f, 100f);
         for (int i = 0; i < dungeonWidth; i++)
         {
             for (int j = 0; j < dungeonHeight; j++)
@@ -122,12 +139,12 @@ public class Controller : MonoBehaviour {
                 if (cacheImg[key].color == Color.white || cacheImg[key].color == Color.blue)
                 {
                     float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, 2, offSet);
-                    cacheImg[key].color = new Color(1f, 1 * data, 0.5f, 1f);
+                    cacheImg[key].color = new Color(0.5f, 1 * data, 0.5f, 1f);
                 }
                 if (cacheImg[key].color == Color.grey)
                 {
                     float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, 2, offSet);
-                    cacheImg[key].color = new Color(0.5f, 1 * data, 0.5f, 1f);
+                    cacheImg[key].color = new Color(1, 1 * data, 1, 1f);
                 }
             }
         }
