@@ -24,12 +24,13 @@ public class Controller : MonoBehaviour {
         map = dungeon.GetDungeonGrid();
         DrawMap();
         FloodFill(map, dungeonWidth / 2, dungeonHeight / 2, Color.white);
-        ////ClearAllLeftOver();
-        //AddTerrain();
-        //float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
-        //if(filledRate < 0.4f){
-        //    CreateMap();
-        //}
+        ClearAllLeftOver();
+        DrawMap();
+        AddTerrain();
+        float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
+        if(filledRate < 0.4f){
+            CreateMap();
+        }
     }
 
 	private void Update()
@@ -120,8 +121,13 @@ public class Controller : MonoBehaviour {
                 string key = i + "-" + j;
                 if (cacheImg[key].color == Color.white || cacheImg[key].color == Color.blue)
                 {
-                    float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, cellSize, offSet);
+                    float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, 2, offSet);
                     cacheImg[key].color = new Color(1f, 1 * data, 0.5f, 1f);
+                }
+                if (cacheImg[key].color == Color.grey)
+                {
+                    float data = GenerateTerrain(i, j, dungeonWidth, dungeonHeight, 2, offSet);
+                    cacheImg[key].color = new Color(0.5f, 1 * data, 0.5f, 1f);
                 }
             }
         }
@@ -167,7 +173,7 @@ public class Controller : MonoBehaviour {
             {
                 string key = i + "-" + j;
                 if(map[i,j].cellType == DungeonCellType.PATH && cacheImg[key].color == Color.blue){
-                    cacheImg[key].color = Color.black;
+                    map[i, j].SetCellType(DungeonCellType.WALL);
                 }
             }
         }

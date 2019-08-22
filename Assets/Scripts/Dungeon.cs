@@ -18,7 +18,7 @@ namespace Kultie.ProcedualDungeon
         public Dungeon(int width, int height)
         {
             dungeonGrid = InitialiseMap(width, height);
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 12; i++)
             {
                 dungeonGrid = SimulationStep(dungeonGrid);
             }
@@ -48,19 +48,30 @@ namespace Kultie.ProcedualDungeon
             return dungeonGrid;
         }
 
+        void PrintDungeon(DungeonCell[,] dungeons){
+            Debug.Log("--------------------------------------");
+            for (int i = 0; i < dungeons.GetLength(0); i++)
+            {
+                for (int j = 0; j < dungeons.GetLength(1); j++)
+                {
+                    Debug.Log(dungeons[i, j].cellType);
+                }
+            }
+        }
+
         public DungeonCell[,] SimulationStep(DungeonCell[,] oldDungeon)
         {
-            DungeonCell[,] newDungeon = (DungeonCell[,])oldDungeon.Clone();
+            DungeonCell[,] newDungeon = new DungeonCell[oldDungeon.GetLength(0), oldDungeon.GetLength(1)];
             for (int i = 0; i < oldDungeon.GetLength(0); i++)
             {
                 for (int j = 0; j < oldDungeon.GetLength(1); j++)
                 {
                     int neightboursCount = CountAliveNeightbours(oldDungeon, i, j);
                     if(oldDungeon[i,j].cellType == DungeonCellType.PATH){
-                        newDungeon[i, j].SetCellType(neightboursCount >= overpopLimit && neightboursCount <= starvationLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
+                        newDungeon[i, j] = new DungeonCell(neightboursCount >= overpopLimit && neightboursCount <= starvationLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
                     }
                     else if (oldDungeon[i, j].cellType == DungeonCellType.WALL){
-                        newDungeon[i, j].SetCellType(neightboursCount <= birthLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
+                        newDungeon[i, j] = new DungeonCell(neightboursCount <= birthLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
                     }
                 }
             }
