@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Kultie.ProcedualDungeon
 {
+    public enum DungeonCellType { PATH, WALL };
     public class Dungeon
     {
-        private bool[,] dungeonGrid;
+        private DungeonCell[,] dungeonGrid;
         private float chanceToStartAlive = 0.45f;
 
         private int overpopLimit = 8;
@@ -17,55 +18,49 @@ namespace Kultie.ProcedualDungeon
         public Dungeon(int width, int height)
         {
             dungeonGrid = InitialiseMap(width, height);
+            for (int i = 0; i < 6; i++)
+            {
+                dungeonGrid = SimulationStep(dungeonGrid);
+            }
         }
 
         public void CreateMap(){
             
         }
 
-        bool[,] InitialiseMap(int width, int height)
+        DungeonCell[,] InitialiseMap(int width, int height)
         {
-            bool[,] dungeon = new bool[width, height];
+            DungeonCell[,] dungeon = new DungeonCell[width, height];
             for (int i = 0; i < dungeon.GetLength(0); i++)
             {
                 for (int j = 0; j < dungeon.GetLength(1); j++)
                 {
                     float randomValue = Random.Range(0f, 1f);
-                    dungeon[i, j] = randomValue < chanceToStartAlive;
+                    dungeon[i, j] = new DungeonCell(randomValue < chanceToStartAlive ? DungeonCellType.PATH : DungeonCellType.WALL);
+
                 }
             }
             return dungeon;
         }
 
-        public void PrintMapValue()
-        {
-            for (int i = 0; i < dungeonGrid.GetLength(0); i++)
-            {
-                for (int j = 0; j < dungeonGrid.GetLength(1); j++)
-                {
-                    Debug.Log("x: " + i + " y: " + j + " value: " + dungeonGrid[i, j]);
-                }
-            }
-        }
-
-        public bool[,] GetDungeonGrid()
+        public DungeonCell[,] GetDungeonGrid()
         {
             return dungeonGrid;
         }
 
-        public bool[,] SimulationStep(bool[,] oldDungeon)
+        public DungeonCell[,] SimulationStep(DungeonCell[,] oldDungeon)
         {
-            bool[,] newDungeon = new bool[oldDungeon.GetLength(0), oldDungeon.GetLength(1)];
+            DungeonCell[,] newDungeon = (DungeonCell[,])oldDungeon.Clone();
             for (int i = 0; i < oldDungeon.GetLength(0); i++)
             {
                 for (int j = 0; j < oldDungeon.GetLength(1); j++)
                 {
                     int neightboursCount = CountAliveNeightbours(oldDungeon, i, j);
-                    if(oldDungeon[i,j]){
-                        newDungeon[i, j] = neightboursCount >= overpopLimit && neightboursCount <= starvationLimit;
+                    if(oldDungeon[i,j].cellType == DungeonCellType.PATH){
+                        newDungeon[i, j].SetCellType(neightboursCount >= overpopLimit && neightboursCount <= starvationLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
                     }
-                    else{
-                        newDungeon[i, j] = neightboursCount <= birthLimit;
+                    else if (oldDungeon[i, j].cellType == DungeonCellType.WALL){
+                        newDungeon[i, j].SetCellType(neightboursCount <= birthLimit ? DungeonCellType.PATH : DungeonCellType.WALL);
                     }
                 }
             }
@@ -73,7 +68,7 @@ namespace Kultie.ProcedualDungeon
             return newDungeon;
         }
 
-        public int CountAliveNeightbours(bool[,] dungeon, int x, int y)
+        public int CountAliveNeightbours(DungeonCell[,] dungeon, int x, int y)
         {
             int count = 0;
             for (int i = -1; i < 2; i++)
@@ -90,12 +85,29 @@ namespace Kultie.ProcedualDungeon
                     {
                         
                     }
-                    else if(dungeon[neightbour_x,neightbour_y]){
+                    else if(dungeon[neightbour_x,neightbour_y].cellType == DungeonCellType.PATH){
                         count = count + 1;
                     }
                 }
             }
             return count;
+        }
+    }
+
+    public class DungeonCell{
+        DungeonCellType _cellType;
+        public DungeonCellType cellType{
+            get{
+                return _cellType;
+            }
+        }
+
+        public DungeonCell(DungeonCellType type){
+            _cellType = type;
+        }
+
+        public void SetCellType(DungeonCellType type){
+            _cellType = type;
         }
     }
 }

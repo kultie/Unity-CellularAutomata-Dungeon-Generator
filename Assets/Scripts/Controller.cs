@@ -10,8 +10,7 @@ public class Controller : MonoBehaviour {
     public float cellSize;
     public int dungeonWidth = 200;
     public int dungeonHeight = 200;
-    [SerializeField]
-    bool[,] map;
+    DungeonCell[,] map;
 
     int fillSpace;
 
@@ -21,21 +20,16 @@ public class Controller : MonoBehaviour {
     void CreateMap () {
        
         fillSpace = 0;
-        dungeon = new Dungeon(dungeonWidth, dungeonHeight);
-        map = dungeon.GetDungeonGrid();
-        for (int i = 0; i < 6; i++)
-        {
-            map = dungeon.SimulationStep(map);
-        }
+        dungeon = new Dungeon(dungeonWidth, dungeonHeight);       
         map = dungeon.GetDungeonGrid();
         DrawMap();
         FloodFill(map, dungeonWidth / 2, dungeonHeight / 2, Color.white);
-        //ClearAllLeftOver();
-        AddTerrain();
-        float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
-        if(filledRate < 0.4f){
-            CreateMap();
-        }
+        ////ClearAllLeftOver();
+        //AddTerrain();
+        //float filledRate = fillSpace * 1f / (dungeonWidth * dungeonHeight);
+        //if(filledRate < 0.4f){
+        //    CreateMap();
+        //}
     }
 
 	private void Update()
@@ -64,7 +58,7 @@ public class Controller : MonoBehaviour {
                     cacheImg[key] = cell;
                 }
                 cacheTransform[cell] = cell.GetComponent<RectTransform>();
-                DrawMapCell(cell, new Vector2(i, j), map[i, j]);
+                DrawMapCell(cell, new Vector2(i, j), map[i, j].cellType == DungeonCellType.PATH);
             }
         }
     }
@@ -83,7 +77,7 @@ public class Controller : MonoBehaviour {
             for (int j = 0; j < map.GetLength(1); j++)
             {
                 if(i == 0 || j == 0 || i == map.GetLength(0) - 1 || j == map.GetLength(1) - 1){
-                    if (map[i, j])
+                    if (map[i, j].cellType == DungeonCellType.PATH)
                     {
                         int nbs = dungeon.CountAliveNeightbours(map, i, j);
                         if (nbs >= 3)
@@ -103,7 +97,7 @@ public class Controller : MonoBehaviour {
         {
             for (int j = 0; j < map.GetLength(1); j++)
             {
-                if (!map[i, j])
+                if (map[i, j].cellType == DungeonCellType.WALL)
                 {
                     int nbs = dungeon.CountAliveNeightbours(map, i, j);
                     if (nbs >= 1 && nbs <= 8)
@@ -140,7 +134,7 @@ public class Controller : MonoBehaviour {
         return Mathf.PerlinNoise(xCoord + offSet.x, yCoord + offSet.y);
     }
 
-    void FloodFillUtil(bool[,] _map, int x, int y, Color prevC, Color newC)
+    void FloodFillUtil(DungeonCell[,] _map, int x, int y, Color prevC, Color newC)
     {      
         if (x < 0 || x >= _map.GetLength(0) || y < 0 || y >= _map.GetLength(1))
             return;
@@ -159,7 +153,7 @@ public class Controller : MonoBehaviour {
         FloodFillUtil(_map, x, y - 1, prevC, newC);
     }
 
-    void FloodFill(bool[,] _map, int x, int y, Color newC)
+    void FloodFill(DungeonCell[,] _map, int x, int y, Color newC)
     {
         string key = x.ToString() + "-" + y.ToString();
         var prevC = cacheImg[key].color;
@@ -172,7 +166,7 @@ public class Controller : MonoBehaviour {
             for (int j = 0; j < dungeonHeight; j++)
             {
                 string key = i + "-" + j;
-                if(map[i,j] && cacheImg[key].color == Color.blue){
+                if(map[i,j].cellType == DungeonCellType.PATH && cacheImg[key].color == Color.blue){
                     cacheImg[key].color = Color.black;
                 }
             }
