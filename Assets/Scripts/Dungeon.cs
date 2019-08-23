@@ -290,10 +290,10 @@ namespace Kultie.ProcedualDungeon
 
         int DiagonalSpriteValue(int x, int y, DungeonCellType compareCellType)
         {
-            bool nwCell = false;
-            bool neCell = false;
-            bool swCell = false;
-            bool seCell = false;
+            bool nwCell = true;
+            bool neCell = true;
+            bool swCell = true;
+            bool seCell = true;
 
             if (y == mapHeight - 1)
             {
