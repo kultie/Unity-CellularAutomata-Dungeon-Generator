@@ -212,28 +212,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellsContainer: {fileID: 1700277128}
-  mapCellPrefab: {fileID: 212404526649727282, guid: a0c5a944c406444dc914f23186998082,
+  mapCellPrefab: {fileID: 114380139091320078, guid: a0c5a944c406444dc914f23186998082,
     type: 2}
   cellSize: 16
-  dungeonWidth: 10
-  dungeonHeight: 10
+  dungeonWidth: 200
+  dungeonHeight: 200
   sprites:
-  - {fileID: 21300000, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300002, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300004, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300006, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300008, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300010, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300012, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300014, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300016, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300018, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300020, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300022, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300024, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300026, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300028, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
-  - {fileID: 21300030, guid: e09e6a1157b374a348970eb012237ef6, type: 3}
+  - {fileID: 21300048, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300050, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300052, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300054, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300056, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300058, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300060, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300062, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300064, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300066, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300068, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300070, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300072, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300074, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300076, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300078, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300080, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300082, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300084, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300086, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300088, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300090, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300092, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  - {fileID: 21300094, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
+  textAsset: {fileID: 4900000, guid: 58999c8276203466d8ff4f226f8851ab, type: 3}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0

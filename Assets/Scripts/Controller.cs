@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Kultie.AutoTileSystem;
 using Kultie.ProcedualDungeon;
 using System.Threading;
 using System;
@@ -11,14 +11,13 @@ public class Controller : MonoBehaviour
 {
     Dungeon dungeon;
     public GameObject cellsContainer;
-    public SpriteRenderer mapCellPrefab;
+    public MapTile mapCellPrefab;
     public float cellSize;
     public int dungeonWidth = 200;
     public int dungeonHeight = 200;
     DungeonCell[,] map;
-    public Sprite[] sprites;
     int fillSpace;
-
+    public Sprite[] sprites;
     public TextAsset textAsset;
 
     JSONNode lookupTable;
@@ -27,7 +26,7 @@ public class Controller : MonoBehaviour
     private void Start()
     {
         ObjectPool.CreatePool(mapCellPrefab, 1000);
-        lookupTable = JSON.Parse(textAsset.ToString());
+        lookupTable = JSON.Parse(textAsset.ToString());       
     }
     // Use this for initialization
     void CreateMap()
@@ -76,28 +75,36 @@ public class Controller : MonoBehaviour
         {
             for (int j = 0; j < dungeonHeight; j++)
             {
-                SpriteRenderer cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
+                MapTile cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
                 DrawMapCell(cell, new Vector2(i, j), map[i, j]);
             }
         }
     }
 
-    void DrawMapCell(SpriteRenderer mapCell, Vector2 position, DungeonCell data)
+    void DrawMapCell(MapTile mapCell, Vector2 position, DungeonCell data)
     {
         Transform cellTransform = mapCell.transform;
-        mapCell.sprite = null;
         cellTransform.localScale = Vector3.one;
         cellTransform.localPosition = position - new Vector2(dungeonWidth / 2, dungeonHeight / 2);
         Color mapCellColor = Color.white;
         if (data.cellType == DungeonCellType.PATH)
         {
             //mapCell.sprite = sprites[lookupTable[data.spriteValue.ToString()].AsInt];
-            mapCell.sprite = sprites[data.spriteValue];
+            //mapCell.sprite = sprites[];
+
+            mapCellColor = new Color(0, 1 * data.pathValue, 1, 1);
+
+            //mapCell.SetSprite(sprites[EightBitAutoTile.GetTileIndex(data.spriteValue)]);
         }
         else if (data.cellType == DungeonCellType.WALL)
         {
-            mapCellColor = new Color(0, 1 * data.pathValue, 1, 1);
+            int[] tiles = VXAutoTile.GetTile(data.spriteValue);
+            for (int i = 0; i < 4; i++)
+            {
+                mapCell.SetSprite(i, sprites[tiles[i]]);
+            }
+            //mapCellColor = new Color(0, 1 * data.wallValue, 0, 1);
         }
-        mapCell.color = mapCellColor;
+        mapCell.SetColor(mapCellColor);
     }
 }

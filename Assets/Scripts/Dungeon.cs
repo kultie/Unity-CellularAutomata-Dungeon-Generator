@@ -164,12 +164,12 @@ namespace Kultie.ProcedualDungeon
                 {
                     if (dungeonGrid[i, j].cellType == DungeonCellType.PATH)
                     {
-                        CalculateCellSpriteValue(i, j, DungeonCellType.PATH);
                         float data = GenerateTerrain(i, j, mapWidth, mapHeight, 2, offSet);
                         dungeonGrid[i, j].pathValue = data;
                     }
                     if (dungeonGrid[i, j].cellType == DungeonCellType.WALL)
                     {
+                        CalculateCellSpriteValue(i, j, DungeonCellType.WALL);
                         float data = GenerateTerrain(i, j, mapWidth, mapHeight, 2, offSet);
                         dungeonGrid[i, j].wallValue = data;
                     }
@@ -190,8 +190,8 @@ namespace Kultie.ProcedualDungeon
 
         public void CalculateCellSpriteValue(int x, int y, DungeonCellType compareCellType)
         {
-            //int value = HorizontalAndVerticleSpriteValue(x, y, compareCellType) + DiagonalSpriteValue(x, y, compareCellType);
-            int value = HorizontalAndVerticleSpriteValue4Bit(x, y, compareCellType);
+            int value = HorizontalAndVerticleSpriteValue(x, y, compareCellType) + DiagonalSpriteValue(x, y, compareCellType);
+            //int value = HorizontalAndVerticleSpriteValue4Bit(x, y, compareCellType);
             dungeonGrid[x, y].spriteValue = value;
         }
 
@@ -284,7 +284,7 @@ namespace Kultie.ProcedualDungeon
             {
                 downCell = dungeonGrid[x, y - 1].cellType == compareCellType;
             }
-            int value = 2 * ConvertBoolToInt(upCell) + 8 * ConvertBoolToInt(leftCell) + 16 * ConvertBoolToInt(rightCell) + 64 * ConvertBoolToInt(downCell);
+            int value = 4 * ConvertBoolToInt(upCell) + 1 * ConvertBoolToInt(leftCell) + 16 * ConvertBoolToInt(rightCell) + 64 * ConvertBoolToInt(downCell);
             return value;
         }
 
@@ -335,7 +335,7 @@ namespace Kultie.ProcedualDungeon
                 }
             }           
 
-            int value = 1 * ConvertBoolToInt(nwCell) + 4 * ConvertBoolToInt(neCell) + 32 * ConvertBoolToInt(swCell) + 128 * ConvertBoolToInt(seCell);
+            int value = 2 * ConvertBoolToInt(nwCell) + 8 * ConvertBoolToInt(neCell) + 128 * ConvertBoolToInt(swCell) + 32 * ConvertBoolToInt(seCell);
             return value;
         }
 
