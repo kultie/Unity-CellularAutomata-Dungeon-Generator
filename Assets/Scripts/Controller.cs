@@ -87,12 +87,13 @@ public class Controller : MonoBehaviour
         cellTransform.localScale = Vector3.one;
         cellTransform.localPosition = position - new Vector2(dungeonWidth / 2, dungeonHeight / 2);
         Color mapCellColor = Color.white;
+        mapCell.Reset();
         if (data.cellType == DungeonCellType.PATH)
         {
             //mapCell.sprite = sprites[lookupTable[data.spriteValue.ToString()].AsInt];
             //mapCell.sprite = sprites[];
 
-            mapCellColor = new Color(0, 1 * data.pathValue, 1, 1);
+            //mapCellColor = new Color(0, 1 * data.pathValue, 1, 1);
 
             //mapCell.SetSprite(sprites[EightBitAutoTile.GetTileIndex(data.spriteValue)]);
         }

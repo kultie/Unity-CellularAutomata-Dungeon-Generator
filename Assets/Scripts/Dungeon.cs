@@ -202,7 +202,7 @@ namespace Kultie.ProcedualDungeon
             bool rightCell;
             bool downCell;
 
-            if (y >= mapHeight - 1)
+            if (y == mapHeight - 1)
             {
                 upCell = false;
             }
@@ -211,7 +211,7 @@ namespace Kultie.ProcedualDungeon
                 upCell = dungeonGrid[x, y + 1].cellType == compareCellType;
             }
 
-            if (x <= 0)
+            if (x == 0)
             {
                 leftCell = false;
             }
@@ -220,7 +220,7 @@ namespace Kultie.ProcedualDungeon
                 leftCell = dungeonGrid[x - 1, y].cellType == compareCellType;
             }
 
-            if (x >= mapWidth - 1)
+            if (x == mapWidth - 1)
             {
                 rightCell = false;
             }
@@ -229,7 +229,7 @@ namespace Kultie.ProcedualDungeon
                 rightCell = dungeonGrid[x + 1, y].cellType == compareCellType;
             }
 
-            if (y <= 0)
+            if (y == 0)
             {
                 downCell = false;
             }
@@ -249,36 +249,36 @@ namespace Kultie.ProcedualDungeon
             bool rightCell;
             bool downCell;
 
-            if (y >= mapHeight - 1)
+            if (y == mapHeight - 1)
             {
-                upCell = false;
+                upCell = true;
             }
             else
             {
                 upCell = dungeonGrid[x, y + 1].cellType == compareCellType;
             }
 
-            if (x <= 0)
+            if (x == 0)
             {
-                leftCell = false;
+                leftCell = true;
             }
             else
             {
                 leftCell = dungeonGrid[x - 1, y].cellType == compareCellType;
             }
 
-            if (x >= mapWidth - 1)
+            if (x == mapWidth - 1)
             {
-                rightCell = false;
+                rightCell = true;
             }
             else
             {
                 rightCell = dungeonGrid[x + 1, y].cellType == compareCellType;
             }
 
-            if (y <= 0)
+            if (y == 0)
             {
-                downCell = false;
+                downCell = true;
             }
             else
             {
@@ -297,17 +297,17 @@ namespace Kultie.ProcedualDungeon
 
             if (y == mapHeight - 1)
             {
-                nwCell = false;
-                neCell = false;
+                nwCell = true;
+                neCell = true;
             }
             else{
                 if (x == 0)
                 {
-                    nwCell = false;
+                    neCell = true;
                 }
                 else if (x == mapWidth - 1)
                 {
-                    neCell = false;
+                    nwCell = true;
                 }
                 else{
                     nwCell = dungeonGrid[x - 1, y + 1].cellType == compareCellType;
@@ -316,17 +316,17 @@ namespace Kultie.ProcedualDungeon
             }
 
             if(y == 0){
-                swCell = false;
-                seCell = false;
+                swCell = true;
+                seCell = true;
             }
             else{
                 if (x == 0)
                 {
-                    swCell = false;
+                    seCell = true;
                 }
                 else if (x == mapWidth - 1)
                 {
-                    seCell = false;
+                    swCell = true;
                 }
                 else
                 {

@@ -178,6 +178,7 @@ MonoBehaviour:
   - {fileID: 212338690164158786}
   - {fileID: 212488555560169152}
   spriteRenderer: {fileID: 212911858008698184}
+  defaultSprite: {fileID: 21300000, guid: 492bf803fdd9b4b249735708758d0dee, type: 3}
 --- !u!212 &212338690164158786
 SpriteRenderer:
   m_ObjectHideFlags: 1
