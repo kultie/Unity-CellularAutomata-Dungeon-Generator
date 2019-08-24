@@ -4,10 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 namespace Kultie.AutoTileSystem{
-    public static class EightBitAutoTile
+    public static class AutoTile
     {
-        public static readonly Dictionary<int, int> NeighborsToAtlasIndex = CreateNeighborsToAtlasIndex();
-
+        static Dictionary<int, int> _NeighborsToAtlasIndex;
+        public static Dictionary<int, int> NeighborsToAtlasIndex {
+            get {
+                if (_NeighborsToAtlasIndex == null) {
+                    _NeighborsToAtlasIndex = CreateNeighborsToAtlasIndex();
+                }
+                return _NeighborsToAtlasIndex;
+            }
+        }
         public static Dictionary<int, int> CreateNeighborsToAtlasIndex()
         {
             //Very simple - just go through all 256 neighbor combos and find the valid
@@ -68,13 +75,6 @@ namespace Kultie.AutoTileSystem{
         private static byte CornerSEMask = 0xDF; //Not --C-----
         private static byte CornerSWMask = 0x7F; //Not C-------
 
-        public static int GetTileIndex(int neighbors)
-        {
-            //First, filter the neighbors of invalidly set corners
-            //byte filtered = FilterNeighbors((byte)neighbors);
-            //Then get the index into the 47-tile set
-            return NeighborsToAtlasIndex[neighbors];
-        }
 
         public static byte FilterNeighbors(byte neighbors)
         {

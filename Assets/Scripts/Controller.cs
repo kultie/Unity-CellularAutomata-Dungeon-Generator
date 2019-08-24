@@ -26,7 +26,7 @@ public class Controller : MonoBehaviour
     private void Start()
     {
         ObjectPool.CreatePool(mapCellPrefab, 1000);
-        lookupTable = JSON.Parse(textAsset.ToString());       
+        lookupTable = JSON.Parse(textAsset.ToString());
     }
     // Use this for initialization
     void CreateMap()

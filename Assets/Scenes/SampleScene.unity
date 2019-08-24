@@ -215,8 +215,8 @@ MonoBehaviour:
   mapCellPrefab: {fileID: 114380139091320078, guid: a0c5a944c406444dc914f23186998082,
     type: 2}
   cellSize: 16
-  dungeonWidth: 200
-  dungeonHeight: 200
+  dungeonWidth: 100
+  dungeonHeight: 100
   sprites:
   - {fileID: 21300048, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
   - {fileID: 21300050, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
