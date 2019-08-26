@@ -67,7 +67,7 @@ public class Controller : MonoBehaviour
         Debug.Log(dungeon.recreateMapCount);
         callback();
     }
-
+    Vector3 oldCamPos;
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -78,9 +78,13 @@ public class Controller : MonoBehaviour
         {
             Vector3 camPos = ClamCamPos(mainCam.transform.position);
             mainCam.transform.position = camPos;
+            //Vector3 camPos = mainCam.transform.position;
             leftTopTile = PosToTile(camPos + mapCenter, -camWidth / 2 - 1, camHeight / 2 + 1);
             rightBottomTile = PosToTile(camPos + mapCenter, camWidth / 2 + 1, -camHeight / 2 - 1);
-            DrawMap();
+            if(Vector3.SqrMagnitude(oldCamPos - camPos) > 1){
+                DrawMap();
+                oldCamPos = camPos;
+            }           
         }
     }
 
@@ -93,8 +97,9 @@ public class Controller : MonoBehaviour
         float minCamPosY = Mathf.Round(-mapCenter.y + camHeight / 2);
         float maxCamPosY = Mathf.Round(mapCenter.y - camHeight / 2);
 
-        float x = Mathf.Clamp(camPos.x, minCamPosX - 0.5f, maxCamPosX - 0.5f);
-        float y = Mathf.Clamp(camPos.y,minCamPosY - 0.5f,maxCamPosY - 0.5f );
+
+        float x = Mathf.Clamp(camPos.x, minCamPosX - 1/mainCam.aspect, maxCamPosX - 1/mainCam.aspect);
+        float y = Mathf.Clamp(camPos.y, minCamPosY - 1/mainCam.aspect, maxCamPosY - 1/mainCam.aspect);
         return new Vector3(x, y, -10);
     }
 
