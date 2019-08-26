@@ -14,7 +14,7 @@ namespace Kultie.ProcedualDungeon
         private int starvationLimit = 5;
 
         private int birthLimit = 4;
-
+        public int recreateMapCount = 0;
         int fillSpace = 0;
 
         int mapWidth;
@@ -31,6 +31,7 @@ namespace Kultie.ProcedualDungeon
         }
         public bool CreateMap()
         {
+            recreateMapCount++;
             fillSpace = 0;
             dungeonGrid = InitialiseMap(mapWidth, mapHeight);
             for (int i = 0; i < 12; i++)

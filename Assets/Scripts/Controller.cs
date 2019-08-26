@@ -26,19 +26,24 @@ public class Controller : MonoBehaviour
 
     Vector3 mapCenter;
 
-    private void Start()
+    private void Awake()
     {
         camHeight = 2f * mainCam.orthographicSize;
-        camWidth = camHeight * mainCam.aspect; 
-        ObjectPool.CreatePool(mapCellPrefab, 1000);
+        camWidth = camHeight * mainCam.aspect;
+        ObjectPool.CreatePool(mapCellPrefab, 20);
+    }
+    private void Start()
+    {
+
     }
     // Use this for initialization
     void CreateMap()
     {
-        mapCenter = new Vector3(dungeonWidth / 2, dungeonHeight / 2,0);
+        mapCenter = new Vector3(dungeonWidth / 2, dungeonHeight / 2, 0);
         StartCoroutine(GenerateMap(() =>
         {
             map = dungeon.GetDungeonGrid();
+            //DrawMapFull();
         }));
     }
 
@@ -48,6 +53,7 @@ public class Controller : MonoBehaviour
         Thread thread = new Thread(() =>
         {
             dungeon = new Dungeon(dungeonWidth, dungeonHeight);
+            dungeon.recreateMapCount = 0;
             while (!done)
             {
                 done = dungeon.CreateMap();
@@ -58,6 +64,7 @@ public class Controller : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log(dungeon.recreateMapCount);
         callback();
     }
 
@@ -67,16 +74,32 @@ public class Controller : MonoBehaviour
         {
             CreateMap();
         }
-
-        if(map != null){
-            Vector3 camPos = mainCam.transform.position;
-            leftTopTile = PosToTile( camPos + mapCenter,-camWidth/2 - 1,camHeight/2 + 1);
+        if (map != null)
+        {
+            Vector3 camPos = ClamCamPos(mainCam.transform.position);
+            mainCam.transform.position = camPos;
+            leftTopTile = PosToTile(camPos + mapCenter, -camWidth / 2 - 1, camHeight / 2 + 1);
             rightBottomTile = PosToTile(camPos + mapCenter, camWidth / 2 + 1, -camHeight / 2 - 1);
             DrawMap();
         }
     }
 
-    Vector2 PosToTile(Vector2 pos, float offSetX, float offSetY){
+    Vector3 ClamCamPos(Vector3 camPos)
+    {
+        Vector3 currentCamPos = camPos;
+        float minCamPosX = Mathf.Round(-mapCenter.x + camWidth / 2);
+        float maxCamPosX = Mathf.Round(mapCenter.x - camWidth / 2);
+
+        float minCamPosY = Mathf.Round(-mapCenter.y + camHeight / 2);
+        float maxCamPosY = Mathf.Round(mapCenter.y - camHeight / 2);
+
+        float x = Mathf.Clamp(camPos.x, minCamPosX - 0.5f, maxCamPosX - 0.5f);
+        float y = Mathf.Clamp(camPos.y,minCamPosY - 0.5f,maxCamPosY - 0.5f );
+        return new Vector3(x, y, -10);
+    }
+
+    Vector2 PosToTile(Vector2 pos, float offSetX, float offSetY)
+    {
         float x = pos.x;
         float y = pos.y;
 
@@ -91,7 +114,8 @@ public class Controller : MonoBehaviour
         return new Vector2(x, y);
     }
 
-    DungeonCell GetTile(Vector2 pos){
+    DungeonCell GetTile(Vector2 pos)
+    {
         return map[(int)pos.x, (int)pos.y];
     }
 
@@ -101,6 +125,19 @@ public class Controller : MonoBehaviour
         for (int i = (int)leftTopTile.x; i <= (int)rightBottomTile.x; i++)
         {
             for (int j = (int)rightBottomTile.y; j <= (int)leftTopTile.y; j++)
+            {
+                MapTile cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
+                DrawMapCell(cell, new Vector2(i, j), map[i, j]);
+            }
+        }
+    }
+
+    void DrawMapFull()
+    {
+        ObjectPool.RecycleAll(mapCellPrefab);
+        for (int i = 0; i < dungeonWidth; i++)
+        {
+            for (int j = 0; j < dungeonHeight; j++)
             {
                 MapTile cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
                 DrawMapCell(cell, new Vector2(i, j), map[i, j]);
