@@ -14,7 +14,6 @@ namespace Kultie.ProcedualDungeon
         private int starvationLimit = 5;
 
         private int birthLimit = 4;
-        public int recreateMapCount = 0;
         int fillSpace = 0;
 
         int mapWidth;
@@ -31,20 +30,19 @@ namespace Kultie.ProcedualDungeon
         }
         public bool CreateMap()
         {
-            recreateMapCount++;
             fillSpace = 0;
             dungeonGrid = InitialiseMap(mapWidth, mapHeight);
             for (int i = 0; i < 12; i++)
             {
                 dungeonGrid = SimulationStep(dungeonGrid);
             }
-            FloodFill(dungeonGrid, mapWidth / 2, mapHeight / 2, DungeonCellFillType.FILLED);
-            float filledRate = fillSpace * 1f / (mapWidth * mapHeight);
-            if (filledRate < 0.4f)
-            {
-                return false;
-            }
-            ClearAllLeftOver();
+            //FloodFill(dungeonGrid, mapWidth / 2, mapHeight / 2, DungeonCellFillType.FILLED);
+            //float filledRate = fillSpace * 1f / (mapWidth * mapHeight);
+            //if (filledRate < 0.4f)
+            //{
+            //    return false;
+            //}
+            //ClearAllLeftOver();
             AddTerrain();
             return true;
         }

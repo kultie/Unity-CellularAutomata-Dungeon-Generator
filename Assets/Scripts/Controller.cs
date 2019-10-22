@@ -6,44 +6,49 @@ using Kultie.ProcedualDungeon;
 using System.Threading;
 using System;
 using UnityEngine.UI;
+using UnityEditor;
 
 public class Controller : MonoBehaviour
 {
     Dungeon dungeon;
-    public GameObject cellsContainer;
-    public MapTile mapCellPrefab;
-    public float cellSize;
-    public int dungeonWidth = 200;
-    public int dungeonHeight = 200;
+    public Transform mapContainer;
+    public int mapWidth = 200;
+    public int mapHeight = 200;
+
+    public Texture wallTexture;
+    public Texture pathTexture;
+
     DungeonCell[,] map;
-    int fillSpace;
-    public Sprite[] sprites;
-    public Camera mainCam;
-    float camWidth;
-    float camHeight;
-    Vector2 leftTopTile;
-    Vector2 rightBottomTile;
 
     Vector3 mapCenter;
 
     private void Awake()
     {
-        camHeight = 2f * mainCam.orthographicSize;
-        camWidth = camHeight * mainCam.aspect;
-        ObjectPool.CreatePool(mapCellPrefab, 20);
+
     }
     private void Start()
     {
-
+        CreateMap();
     }
     // Use this for initialization
     void CreateMap()
     {
-        mapCenter = new Vector3(dungeonWidth / 2, dungeonHeight / 2, 0);
+        mapCenter = new Vector3(mapWidth / 2, mapHeight / 2, 0);
         StartCoroutine(GenerateMap(() =>
         {
             map = dungeon.GetDungeonGrid();
-            //DrawMapFull();
+
+            CreateMapMesh("Wall", wallTexture, CreateMesh(wallTexture, 24, (DungeonCell cell) => {
+                return cell.cellType == DungeonCellType.WALL;
+            }, (DungeonCell cell) => {
+                return VXAutoTile.GetTile(cell.spriteValue);
+            }));
+
+            CreateMapMesh("Path", pathTexture, CreateMesh(pathTexture, 24, (DungeonCell cell) => {
+                return cell.cellType == DungeonCellType.PATH;
+            }, (DungeonCell cell) => {
+                return VXAutoTile.GetTile(0);
+            }));
         }));
     }
 
@@ -52,8 +57,7 @@ public class Controller : MonoBehaviour
         bool done = false;
         Thread thread = new Thread(() =>
         {
-            dungeon = new Dungeon(dungeonWidth, dungeonHeight);
-            dungeon.recreateMapCount = 0;
+            dungeon = new Dungeon(mapWidth, mapHeight);
             while (!done)
             {
                 done = dungeon.CreateMap();
@@ -64,117 +68,111 @@ public class Controller : MonoBehaviour
         {
             yield return null;
         }
-        Debug.Log(dungeon.recreateMapCount);
         callback();
     }
-    Vector3 oldCamPos;
-    private void Update()
+
+    Mesh CreateMesh(Texture texture, int tileSize, CheckMapTile condition, GetMapTile func)
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        Mesh mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+
+        Vector4[] uvs = GenerateUV(texture, tileSize);
+
+        int mapSize = mapHeight * mapWidth;
+
+        Vector3[] verticies = new Vector3[4 * 4 * mapSize];
+        Vector2[] uv = new Vector2[4 * 4 * mapSize];
+        int[] triangles = new int[6 * 4 * mapSize];
+
+        for (int i = 0; i < mapWidth; i++)
         {
-            CreateMap();
-        }
-        if (map != null)
-        {
-            Vector3 camPos = ClamCamPos(mainCam.transform.position);
-            mainCam.transform.position = camPos;
-            //Vector3 camPos = mainCam.transform.position;
-            leftTopTile = PosToTile(camPos + mapCenter, -camWidth / 2 - 1, camHeight / 2 + 1);
-            rightBottomTile = PosToTile(camPos + mapCenter, camWidth / 2 + 1, -camHeight / 2 - 1);
-            if(Vector3.SqrMagnitude(oldCamPos - camPos) > 1){
-                DrawMap();
-                oldCamPos = camPos;
-            }           
-        }
-    }
-
-    Vector3 ClamCamPos(Vector3 camPos)
-    {
-        Vector3 currentCamPos = camPos;
-        float minCamPosX = Mathf.Round(-mapCenter.x + camWidth / 2);
-        float maxCamPosX = Mathf.Round(mapCenter.x - camWidth / 2);
-
-        float minCamPosY = Mathf.Round(-mapCenter.y + camHeight / 2);
-        float maxCamPosY = Mathf.Round(mapCenter.y - camHeight / 2);
-
-
-        float x = Mathf.Clamp(camPos.x, minCamPosX - 1/mainCam.aspect, maxCamPosX - 1/mainCam.aspect);
-        float y = Mathf.Clamp(camPos.y, minCamPosY - 1/mainCam.aspect, maxCamPosY - 1/mainCam.aspect);
-        return new Vector3(x, y, -10);
-    }
-
-    Vector2 PosToTile(Vector2 pos, float offSetX, float offSetY)
-    {
-        float x = pos.x;
-        float y = pos.y;
-
-        x = Mathf.RoundToInt(pos.x + offSetX);
-        y = Mathf.RoundToInt(pos.y + offSetY);
-
-        x = Math.Max(0, x);
-        y = Math.Min(dungeonHeight - 1, y);
-        x = Math.Min(dungeonWidth - 1, x);
-        y = Math.Max(0, y);
-
-        return new Vector2(x, y);
-    }
-
-    DungeonCell GetTile(Vector2 pos)
-    {
-        return map[(int)pos.x, (int)pos.y];
-    }
-
-    void DrawMap()
-    {
-        ObjectPool.RecycleAll(mapCellPrefab);
-        for (int i = (int)leftTopTile.x; i <= (int)rightBottomTile.x; i++)
-        {
-            for (int j = (int)rightBottomTile.y; j <= (int)leftTopTile.y; j++)
+            for (int j = 0; j < mapHeight; j++)
             {
-                MapTile cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
-                DrawMapCell(cell, new Vector2(i, j), map[i, j]);
+                DungeonCell data = map[i, j];
+                if (condition(data))
+                {
+                    GenerateMeshData(i, j, func(data), verticies, uv, triangles, uvs);
+                }
             }
         }
+        mesh.vertices = verticies;
+        mesh.uv = uv;
+        mesh.triangles = triangles;
+        MeshUtility.Optimize(mesh);
+        return mesh;
     }
 
-    void DrawMapFull()
+    void GenerateMeshData(int i, int j, int[] tiles, Vector3[] verticies, Vector2[] uv, int[] triangles, Vector4[] uvs)
     {
-        ObjectPool.RecycleAll(mapCellPrefab);
-        for (int i = 0; i < dungeonWidth; i++)
+        int index = i * mapHeight + j;
+        Vector3 offSet = new Vector3(-0.5f, -1, 0);
+        for (int k = 0; k < 4; k++)
         {
-            for (int j = 0; j < dungeonHeight; j++)
-            {
-                MapTile cell = ObjectPool.Spawn(mapCellPrefab, cellsContainer.transform);
-                DrawMapCell(cell, new Vector2(i, j), map[i, j]);
-            }
+            Vector4 tileUV = uvs[tiles[k]];
+
+            float rootX = i + 0.5f * (k % 2);
+            float rootY = j + 1 - 0.5f * (k / 2);
+
+            verticies[index * 16 + k * 4 + 0] = new Vector3(rootX, rootY, 0) - mapCenter + offSet;
+            verticies[index * 16 + k * 4 + 1] = new Vector3(rootX, rootY + 0.5f, 0) - mapCenter + offSet;
+            verticies[index * 16 + k * 4 + 2] = new Vector3(rootX + 0.5f, rootY + 0.5f, 0) - mapCenter + offSet;
+            verticies[index * 16 + k * 4 + 3] = new Vector3(rootX + 0.5f, rootY, 0) - mapCenter + offSet;
+
+            uv[index * 16 + k * 4 + 0] = new Vector2(tileUV.x, tileUV.y);
+            uv[index * 16 + k * 4 + 1] = new Vector2(tileUV.x, tileUV.w);
+            uv[index * 16 + k * 4 + 2] = new Vector2(tileUV.z, tileUV.w);
+            uv[index * 16 + k * 4 + 3] = new Vector2(tileUV.z, tileUV.y);
+
+
+            triangles[index * 24 + k * 6 + 0] = index * 16 + k * 4 + 0;
+            triangles[index * 24 + k * 6 + 1] = index * 16 + k * 4 + 1;
+            triangles[index * 24 + k * 6 + 2] = index * 16 + k * 4 + 2;
+
+            triangles[index * 24 + k * 6 + 3] = index * 16 + k * 4 + 0;
+            triangles[index * 24 + k * 6 + 4] = index * 16 + k * 4 + 2;
+            triangles[index * 24 + k * 6 + 5] = index * 16 + k * 4 + 3;
         }
     }
 
-    void DrawMapCell(MapTile mapCell, Vector3 position, DungeonCell data)
+    public Vector4[] GenerateUV(Texture texture, float tileSize)
     {
-        Transform cellTransform = mapCell.transform;
-        cellTransform.localScale = Vector3.one;
-        cellTransform.localPosition = position - mapCenter;
-        Color mapCellColor = Color.white;
-        mapCell.Reset();
-        if (data.cellType == DungeonCellType.PATH)
-        {
-            //mapCell.sprite = sprites[lookupTable[data.spriteValue.ToString()].AsInt];
-            //mapCell.sprite = sprites[];
+        List<Vector4> uvs = new List<Vector4>();
+        float col = texture.width / tileSize;
+        float row = texture.height / tileSize;
+        float width = tileSize / texture.width;
+        float height = tileSize / texture.height;
 
-            //mapCellColor = new Color(0, 1 * data.pathValue, 1, 1);
+        float u0 = 0;
+        float v0 = 1 - height;
 
-            //mapCell.SetSprite(sprites[EightBitAutoTile.GetTileIndex(data.spriteValue)]);
-        }
-        else if (data.cellType == DungeonCellType.WALL)
+        float u1 = width;
+        float v1 = 1;
+
+        for (int j = 0; j < row; j++)
         {
-            int[] tiles = VXAutoTile.GetTile(data.spriteValue);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < col; i++)
             {
-                mapCell.SetSprite(i, sprites[tiles[i]]);
+                uvs.Add(new Vector4(u0, v0, u1, v1));
+                u0 += width;
+                u1 += width;
             }
-            //mapCellColor = new Color(0, 1 * data.wallValue, 0, 1);
+            u0 = 0;
+            v0 -= height;
+            u1 = width;
+            v1 -= height;
         }
-        mapCell.SetColor(mapCellColor);
+
+        return uvs.ToArray();
+    }
+
+    void CreateMapMesh(string gameObjectName, Texture texture, Mesh mesh) {
+        GameObject mapMesh = new GameObject(gameObjectName);
+        mapMesh.transform.parent = mapContainer;
+        MeshFilter meshFilter = mapMesh.AddComponent<MeshFilter>();
+        MeshRenderer meshRenderer = mapMesh.AddComponent<MeshRenderer>();
+        Material material = new Material(Shader.Find("Unlit/Transparent"));
+        material.mainTexture = texture;
+        meshRenderer.material = material;
+        meshFilter.mesh = mesh;
     }
 }
