@@ -11,7 +11,10 @@
 ## Technical hurdle
 - Right now the mesh creation step is very unoptimized that it created a lot of verticies and triangles. If any one khow how to fix it feel free to make a pull request
 
-## Resource:
+## Resources
 - Simple implementation for generating random dungeon using [Cellular Automata](https://gamedevelopment.tutsplus.com/tutorials/generate-random-cave-levels-using-cellular-automata--gamedev-9664)
 - [Auto tile algorithm](http://thepowertobringlight.blogspot.com/2016/11/autotiles-formats-and-algorithms.html)
 - Google ¯\\_(ツ)_/¯
+
+## Copyright
+- Tile resources belong to [this](https://www.rpgmakerweb.com/company)
