@@ -14,4 +14,4 @@
 ## Resource:
 - Simple implementation for generating random dungeon using [Cellular Automata](https://gamedevelopment.tutsplus.com/tutorials/generate-random-cave-levels-using-cellular-automata--gamedev-9664)
 - [Auto tile algorithm](http://thepowertobringlight.blogspot.com/2016/11/autotiles-formats-and-algorithms.html)
-- Google ¯\_(ツ)_/¯
+- Google ¯\\_(ツ)_/¯
