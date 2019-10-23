@@ -16,5 +16,5 @@
 - [Auto tile algorithm](http://thepowertobringlight.blogspot.com/2016/11/autotiles-formats-and-algorithms.html)
 - Google ¯\\_(ツ)_/¯
 
-## Copyright
-- Tile resources belong to [this](https://www.rpgmakerweb.com/company)
+## Note 
+- The tile assets is for study purpose only, i don't own or made them
