@@ -82,7 +82,7 @@ public class Controller : MonoBehaviour
 
         Vector3[] verticies = new Vector3[4 * 4 * mapSize];
         Vector2[] uv = new Vector2[4 * 4 * mapSize];
-        int[] triangles = new int[6 * 4 * mapSize];
+        List<int> triangles = new List<int>();
 
         for (int i = 0; i < mapWidth; i++)
         {
@@ -97,12 +97,12 @@ public class Controller : MonoBehaviour
         }
         mesh.vertices = verticies;
         mesh.uv = uv;
-        mesh.triangles = triangles;
+        mesh.triangles = triangles.ToArray();
         MeshUtility.Optimize(mesh);
         return mesh;
     }
 
-    void GenerateMeshData(int i, int j, int[] tiles, Vector3[] verticies, Vector2[] uv, int[] triangles, Vector4[] uvs)
+    void GenerateMeshData(int i, int j, int[] tiles, Vector3[] verticies, Vector2[] uv, List<int> triangles, Vector4[] uvs)
     {
         int index = i * mapHeight + j;
         Vector3 offSet = new Vector3(-0.5f, -1, 0);
@@ -124,13 +124,13 @@ public class Controller : MonoBehaviour
             uv[index * 16 + k * 4 + 3] = new Vector2(tileUV.z, tileUV.y);
 
 
-            triangles[index * 24 + k * 6 + 0] = index * 16 + k * 4 + 0;
-            triangles[index * 24 + k * 6 + 1] = index * 16 + k * 4 + 1;
-            triangles[index * 24 + k * 6 + 2] = index * 16 + k * 4 + 2;
+            triangles.Add(index * 16 + k * 4 + 0);
+            triangles.Add(index * 16 + k * 4 + 1);
+            triangles.Add(index * 16 + k * 4 + 2);
 
-            triangles[index * 24 + k * 6 + 3] = index * 16 + k * 4 + 0;
-            triangles[index * 24 + k * 6 + 4] = index * 16 + k * 4 + 2;
-            triangles[index * 24 + k * 6 + 5] = index * 16 + k * 4 + 3;
+            triangles.Add(index * 16 + k * 4 + 0);
+            triangles.Add(index * 16 + k * 4 + 2);
+            triangles.Add(index * 16 + k * 4 + 3);
         }
     }
 
