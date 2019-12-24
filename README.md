@@ -12,6 +12,7 @@
 ## Technical hurdle
 - Right now the mesh creation step is very unoptimized that it created a lot of verticies and triangles. If any one khow how to fix it feel free to make a pull request
 - The method to generate dungeon using compute shader doesn't seem to provide any performance. Anyone know how or have a suggest please make a issue and let's me know how to properly use the compute shader.
+- The compute shader method does not have a flood fill to remove unused path of map because I cannot make the compute shader works on sub-thread. (Still need to learn about this)
 
 ## Resources
 - Simple implementation for generating random dungeon using [Cellular Automata](https://gamedevelopment.tutsplus.com/tutorials/generate-random-cave-levels-using-cellular-automata--gamedev-9664)

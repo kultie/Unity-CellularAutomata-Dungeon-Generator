@@ -53,13 +53,17 @@ namespace Kultie.ProcedualDungeon
 
 
             }
-            //FloodFill(dungeonGrid, mapWidth / 2, mapHeight / 2, DungeonCellFillType.FILLED);
-            //float filledRate = fillSpace * 1f / (mapWidth * mapHeight);
-            //if (filledRate < 0.4f)
-            //{
-            //    return false;
-            //}
-            ////ClearAllLeftOver();
+            if (!useComputeShader)
+            {
+                FloodFill(dungeonGrid, mapWidth / 2, mapHeight / 2, DungeonCellFillType.FILLED);
+                float filledRate = fillSpace * 1f / (mapWidth * mapHeight);
+
+                if (filledRate < 0.4f)
+                {
+                    return false;
+                }
+                ClearAllLeftOver();
+            }
             AddTerrain();
             return true;
         }

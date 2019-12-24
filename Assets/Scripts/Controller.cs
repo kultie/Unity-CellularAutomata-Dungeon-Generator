@@ -58,6 +58,7 @@ public class Controller : MonoBehaviour
         }));
     }
     IEnumerator GenerateMap(Action callback) {
+        bool done = false;
         if (useComputeShader)
         {
             dungeon = new Dungeon(mapWidth, mapHeight, shader, useComputeShader);
@@ -65,7 +66,7 @@ public class Controller : MonoBehaviour
             callback();
         }
         else {
-            bool done = false;
+            
             Thread thread = new Thread(() =>
             {
                 dungeon = new Dungeon(mapWidth, mapHeight, shader, useComputeShader);
