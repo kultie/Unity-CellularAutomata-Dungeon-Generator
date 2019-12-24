@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -150,10 +151,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapContainer: {fileID: 1700277129}
-  mapWidth: 100
+  mapWidth: 50
   mapHeight: 50
   wallTexture: {fileID: 2800000, guid: ca7d91e769926473ea49be2014dd7298, type: 3}
   pathTexture: {fileID: 2800000, guid: 492bf803fdd9b4b249735708758d0dee, type: 3}
+  shader: {fileID: 7200000, guid: a9f728c24f9964d4b80abbba3bc89221, type: 3}
+  useComputeShader: 0
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -207,6 +210,21 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 184d4221c47334326a9ac6221829b6cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapSize: 200
+  mapContainer: {fileID: 1700277129}
+  shader: {fileID: 7200000, guid: a9f728c24f9964d4b80abbba3bc89221, type: 3}
+  texture: {fileID: 2800000, guid: b80960192005e41a3aae7c19b6360447, type: 3}
 --- !u!1 &1700277128
 GameObject:
   m_ObjectHideFlags: 0

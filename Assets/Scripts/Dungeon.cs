@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 namespace Kultie.ProcedualDungeon
 {
-    public enum DungeonCellType { PATH, WALL };
+    public enum DungeonCellType { WALL, PATH };
     public enum DungeonCellFillType { FILLED, NON };
     public class Dungeon
     {
+        const int threadGroupSize = 1024;
+
+        bool useComputeShader;
+
+        private ComputeShader shader;
         private DungeonCell[,] dungeonGrid;
         private int chanceToStartAlive = 45;
 
@@ -19,13 +25,15 @@ namespace Kultie.ProcedualDungeon
         int mapWidth;
         int mapHeight;
 
-        Random rnd;
+        System.Random rnd;
 
-        public Dungeon(int width, int height)
+        public Dungeon(int width, int height, ComputeShader shader, bool useComputeShader)
         {
             mapWidth = width;
             mapHeight = height;
-            rnd = new Random();
+            rnd = new System.Random();
+            this.shader = shader;
+            this.useComputeShader = useComputeShader;
 
         }
         public bool CreateMap()
@@ -34,7 +42,16 @@ namespace Kultie.ProcedualDungeon
             dungeonGrid = InitialiseMap(mapWidth, mapHeight);
             for (int i = 0; i < 12; i++)
             {
-                dungeonGrid = SimulationStep(dungeonGrid);
+                if (useComputeShader)
+                {
+                    CalculateCell();
+                }
+                else
+                {
+                    dungeonGrid = SimulationStep(dungeonGrid);
+                }
+
+
             }
             //FloodFill(dungeonGrid, mapWidth / 2, mapHeight / 2, DungeonCellFillType.FILLED);
             //float filledRate = fillSpace * 1f / (mapWidth * mapHeight);
@@ -42,7 +59,7 @@ namespace Kultie.ProcedualDungeon
             //{
             //    return false;
             //}
-            //ClearAllLeftOver();
+            ////ClearAllLeftOver();
             AddTerrain();
             return true;
         }
@@ -80,6 +97,53 @@ namespace Kultie.ProcedualDungeon
         public DungeonCell[,] GetDungeonGrid()
         {
             return dungeonGrid;
+        }
+
+        void CalculateCell()
+        {
+
+            int numCells = mapWidth * mapHeight;
+
+            var oldCellData = new ComputeCelldata[numCells];
+            for (int i = 0; i < numCells; i++)
+            {
+                int x = i % mapHeight;
+                int y = Mathf.FloorToInt(i / mapHeight);
+                oldCellData[i].dungeonCellType = (int)dungeonGrid[x, y].cellType;
+                oldCellData[i].dungeonCellFillType = (int)dungeonGrid[x, y].cellType;
+            }
+
+            var newCellData = new ComputeCelldata[numCells];
+
+            var oldCellBuffer = new ComputeBuffer(numCells, sizeof(int) * 2);
+            var newCellBuffer = new ComputeBuffer(numCells, sizeof(int) * 2);
+
+            oldCellBuffer.SetData(oldCellData);
+            newCellBuffer.SetData(newCellData);
+
+            shader.SetBuffer(0, "oldCells", oldCellBuffer);
+            shader.SetBuffer(0, "newCells", newCellBuffer);
+            shader.SetInt("numCells", mapWidth * mapHeight);
+            shader.SetInt("horizontalBound", mapWidth - 1);
+            shader.SetInt("verticleBound", mapHeight - 1);
+            shader.SetInt("overpopLimit", overpopLimit);
+            shader.SetInt("starvationLimit", starvationLimit);
+            shader.SetInt("birthLimit", birthLimit);
+
+            int threadGroups = Mathf.CeilToInt(numCells / (float)threadGroupSize);
+            shader.Dispatch(0, threadGroups, 1, 1);
+            newCellBuffer.GetData(newCellData);
+
+            for (int i = 0; i < numCells; i++)
+            {
+                int x = i % mapHeight;
+                int y = Mathf.FloorToInt(i / mapHeight);
+                dungeonGrid[x, y].SetCellType((DungeonCellType)newCellData[i].dungeonCellType);
+                dungeonGrid[x, y].SetFillType((DungeonCellFillType)newCellData[i].dungeonCellFillType);
+            }
+
+            oldCellBuffer.Dispose();
+            newCellBuffer.Dispose();
         }
 
         public DungeonCell[,] SimulationStep(DungeonCell[,] oldDungeon)
@@ -299,7 +363,8 @@ namespace Kultie.ProcedualDungeon
                 nwCell = true;
                 neCell = true;
             }
-            else{
+            else
+            {
                 if (x == 0)
                 {
                     neCell = true;
@@ -308,17 +373,20 @@ namespace Kultie.ProcedualDungeon
                 {
                     nwCell = true;
                 }
-                else{
+                else
+                {
                     nwCell = dungeonGrid[x - 1, y + 1].cellType == compareCellType;
                     neCell = dungeonGrid[x + 1, y + 1].cellType == compareCellType;
                 }
             }
 
-            if(y == 0){
+            if (y == 0)
+            {
                 swCell = true;
                 seCell = true;
             }
-            else{
+            else
+            {
                 if (x == 0)
                 {
                     seCell = true;
@@ -332,7 +400,7 @@ namespace Kultie.ProcedualDungeon
                     swCell = dungeonGrid[x - 1, y - 1].cellType == compareCellType;
                     seCell = dungeonGrid[x + 1, y - 1].cellType == compareCellType;
                 }
-            }           
+            }
 
             int value = 2 * ConvertBoolToInt(nwCell) + 8 * ConvertBoolToInt(neCell) + 128 * ConvertBoolToInt(swCell) + 32 * ConvertBoolToInt(seCell);
             return value;
@@ -353,6 +421,9 @@ namespace Kultie.ProcedualDungeon
 
         public float pathValue = 1f;
         public float wallValue = 1f;
+
+        public int dungeonCellType;
+        public int dungeonCellFillType;
 
         public int spriteValue;
 
@@ -387,6 +458,12 @@ namespace Kultie.ProcedualDungeon
         {
             _fillType = type;
         }
+    }
+
+    public struct ComputeCelldata
+    {
+        public int dungeonCellType;
+        public int dungeonCellFillType;
     }
 }
 

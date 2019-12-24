@@ -7,6 +7,7 @@ using System.Threading;
 using System;
 using UnityEngine.UI;
 using UnityEditor;
+using System.Linq;
 
 public class Controller : MonoBehaviour
 {
@@ -17,10 +18,15 @@ public class Controller : MonoBehaviour
 
     public Texture wallTexture;
     public Texture pathTexture;
+    public ComputeShader shader;
+
+    public bool useComputeShader;
 
     DungeonCell[,] map;
 
     Vector3 mapCenter;
+
+    
 
     private void Awake()
     {
@@ -51,24 +57,31 @@ public class Controller : MonoBehaviour
             }));
         }));
     }
-
-    IEnumerator GenerateMap(Action callback)
-    {
-        bool done = false;
-        Thread thread = new Thread(() =>
+    IEnumerator GenerateMap(Action callback) {
+        if (useComputeShader)
         {
-            dungeon = new Dungeon(mapWidth, mapHeight);
+            dungeon = new Dungeon(mapWidth, mapHeight, shader, useComputeShader);
+            dungeon.CreateMap();
+            callback();
+        }
+        else {
+            bool done = false;
+            Thread thread = new Thread(() =>
+            {
+                dungeon = new Dungeon(mapWidth, mapHeight, shader, useComputeShader);
+                while (!done)
+                {
+                    done = dungeon.CreateMap();
+                }
+            });
+            thread.Start();
             while (!done)
             {
-                done = dungeon.CreateMap();
+                yield return null;
             }
-        });
-        thread.Start();
-        while (!done)
-        {
-            yield return null;
+            callback();
         }
-        callback();
+
     }
 
     Mesh CreateMesh(Texture texture, int tileSize, CheckMapTile condition, GetMapTile func)
@@ -81,6 +94,7 @@ public class Controller : MonoBehaviour
         int mapSize = mapHeight * mapWidth;
 
         Vector3[] verticies = new Vector3[4 * 4 * mapSize];
+
         Vector2[] uv = new Vector2[4 * 4 * mapSize];
         List<int> triangles = new List<int>();
 
@@ -174,5 +188,9 @@ public class Controller : MonoBehaviour
         material.mainTexture = texture;
         meshRenderer.material = material;
         meshFilter.mesh = mesh;
+    }
+
+    int ConvertVector3ToID(Vector3 value) {
+        return (int)(value.y * mapHeight + value.x);
     }
 }

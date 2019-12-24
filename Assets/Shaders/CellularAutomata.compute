@@ -1,0 +1,56 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+static const int threadGroupSize = 1024;
+
+struct Cell{
+    int dungeonCellType;
+    int dungeonCellFillType;
+};
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWStructuredBuffer<Cell> oldCells;
+RWStructuredBuffer<Cell> newCells;
+int horizontalBound;
+int verticleBound;
+int overpopLimit;
+int starvationLimit;
+int birthLimit;
+
+[numthreads(threadGroupSize,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int x = id.x % (verticleBound + 1);
+    int y = round(id.x / (verticleBound + 1));
+
+    int neightBorsCount = 0;
+    for (int i = -1; i < 2; i++)
+    {
+        for (int j = -1; j < 2; j++)
+        {
+            int neightbour_x = x + i;
+            int neightbour_y = y + j;
+            if (i == 0 && j == 0)
+            {
+
+            }
+            else if (neightbour_x < 0 || neightbour_y < 0 || neightbour_x >= horizontalBound || neightbour_y >= verticleBound)
+            {
+
+            }
+            else if (oldCells[neightbour_y * (verticleBound + 1) + neightbour_x].dungeonCellType == 1)
+            {
+                neightBorsCount = neightBorsCount + 1;
+            }
+        }
+    }
+    
+    if (oldCells[id.x].dungeonCellType == 1)
+    {
+        newCells[id.x].dungeonCellType = (neightBorsCount >= overpopLimit && neightBorsCount <= starvationLimit) ? 1 : 0;
+    }
+    else if (oldCells[id.x].dungeonCellType == 0)
+    {
+        newCells[id.x].dungeonCellType = (neightBorsCount <= birthLimit) ? 1 : 0;
+    }
+}
